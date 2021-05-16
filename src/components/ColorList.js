@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
+import EditMenu from './EditMenu'
+import { axiosWithAuth } from "../helpers/axiosWithAuth";
+import Color from './Color'
 
 const initialColor = {
   color: "",
@@ -17,10 +19,33 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-
+    axiosWithAuth()
+    .put(`/colors/${colorToEdit.id}`, colorToEdit)
+    .then((res) => {
+      updateColors(
+        colors.map((col) => {
+          if (col.id === res.data.id) {
+            return res.data;
+          } else {
+            return col;
+          }
+        })
+      );
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   };
 
   const deleteColor = color => {
+    axiosWithAuth()
+      .delete(`/colors/${color.id}`)
+      .then((res) => {
+        updateColors(colors.filter((col) => col.id !== Number(res.data)));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -37,7 +62,3 @@ const ColorList = ({ colors, updateColors }) => {
 };
 
 export default ColorList;
-
-//Task List:
-//1. Complete the saveEdit functions by making a put request for saving colors. (Think about where will you get the id from...)
-//2. Complete the deleteColor functions by making a delete request for deleting colors.
